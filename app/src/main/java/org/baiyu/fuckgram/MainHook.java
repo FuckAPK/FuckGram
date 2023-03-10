@@ -65,9 +65,9 @@ public class MainHook implements IXposedHookLoadPackage {
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                             super.beforeHookedMethod(param);
                             XposedHelpers.setIntField(param.thisObject, "downloadChunkSizeBig", downloadChunkSizeBig);
-                            XposedHelpers.setObjectField(param.thisObject, "maxDownloadRequests", maxDownloadRequests);
-                            XposedHelpers.setObjectField(param.thisObject, "maxDownloadRequestsBig", maxDownloadRequestsBig);
-                            XposedHelpers.setObjectField(param.thisObject, "maxCdnParts", maxCdnParts);
+                            XposedHelpers.setIntField(param.thisObject, "maxDownloadRequests", maxDownloadRequests);
+                            XposedHelpers.setIntField(param.thisObject, "maxDownloadRequestsBig", maxDownloadRequestsBig);
+                            XposedHelpers.setIntField(param.thisObject, "maxCdnParts", maxCdnParts);
                             param.setResult(null);
                         }
                     });
