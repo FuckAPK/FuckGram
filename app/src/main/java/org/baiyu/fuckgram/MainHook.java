@@ -45,16 +45,8 @@ public class MainHook implements IXposedHookLoadPackage {
             XposedBridge.hookAllMethods(
                     XposedHelpers.findClass(
                             "org.telegram.ui.ChatActivity", lpparam.classLoader),
-                    "selectReaction",
-                    new XC_MethodHook() {
-                        @Override
-                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                          super.beforeHookedMethod(param);
-                          if (param.args[6] instanceof Boolean && (Boolean) param.args[6]) {
-                            param.setResult(null);
-                          }
-                        }
-                    });
+                    "onDoubleTap",
+                    XC_MethodReplacement.returnConstant(null));
             // speed up download
             XposedBridge.hookAllMethods(
                     XposedHelpers.findClass(
