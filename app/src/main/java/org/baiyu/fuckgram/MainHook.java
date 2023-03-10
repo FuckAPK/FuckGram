@@ -18,6 +18,13 @@ public class MainHook implements IXposedHookLoadPackage {
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
         try {
+            // message force forward-able
+            XposedBridge.hookAllMethods(
+                    XposedHelpers.findClass(
+                            "org.telegram.messenger.MessagesController", lpparam.classLoader),
+                    "isChatNoForwards",
+                    XC_MethodReplacement.returnConstant(false));
+            // remove sponsored ads
             XposedBridge.hookAllMethods(
                     XposedHelpers.findClass(
                             "org.telegram.messenger.MessagesController", lpparam.classLoader),
@@ -25,19 +32,30 @@ public class MainHook implements IXposedHookLoadPackage {
                     XC_MethodReplacement.returnConstant(null));
             XposedBridge.hookAllMethods(
                     XposedHelpers.findClass(
-                            "org.telegram.messenger.MessagesController", lpparam.classLoader),
-                    "isChatNoForwards",
-                    XC_MethodReplacement.returnConstant(false));
-            XposedBridge.hookAllMethods(
-                    XposedHelpers.findClass(
                             "org.telegram.ui.ChatActivity", lpparam.classLoader),
                     "addSponsoredMessages",
                     XC_MethodReplacement.returnConstant(null));
+            // disable reaction list in context menu
             XposedBridge.hookAllMethods(
                     XposedHelpers.findClass(
                             "org.telegram.messenger.MediaDataController", lpparam.classLoader),
                     "getEnabledReactionsList",
                     XC_MethodReplacement.returnConstant(new ArrayList<>()));
+            // disable double tap quick reaction
+            XposedBridge.hookAllMethods(
+                    XposedHelpers.findClass(
+                            "org.telegram.ui.ChatActivity", lpparam.classLoader),
+                    "selectReaction",
+                    new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                          super.beforeHookedMethod(param);
+                          if (param.args[6] instanceof Boolean && (Boolean) param.args[6]) {
+                            param.setResult(null);
+                          }
+                        }
+                    });
+            // speed up download
             XposedBridge.hookAllMethods(
                     XposedHelpers.findClass(
                             "org.telegram.messenger.FileLoadOperation", lpparam.classLoader),
