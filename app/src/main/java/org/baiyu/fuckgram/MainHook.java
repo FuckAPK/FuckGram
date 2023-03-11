@@ -16,7 +16,7 @@ public class MainHook implements IXposedHookLoadPackage {
     private final static int maxDownloadRequestsBig = 8;
     private final static int maxCdnParts = (int) (DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig);
     @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
+    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
         try {
             // message force forward-able
             XposedBridge.hookAllMethods(
@@ -64,6 +64,18 @@ public class MainHook implements IXposedHookLoadPackage {
                         protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                             super.afterHookedMethod(param);
                             XposedHelpers.setBooleanField(param.thisObject, "premiumLocked", true);
+                        }
+                    });
+            // remove premium emoji set
+            // public EmojiTabsStrip(Context context, Theme.ResourcesProvider resourcesProvider, boolean includeStandard, boolean includeAnimated, int type, Runnable onSettingsOpen)
+            XposedBridge.hookAllConstructors(
+                    XposedHelpers.findClass(
+                            "org.telegram.ui.Components.EmojiTabsStrip", lpparam.classLoader),
+                    new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                            super.beforeHookedMethod(param);
+                            param.args[3] = false;
                         }
                     });
             // speed up download
