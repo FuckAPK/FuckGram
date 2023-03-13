@@ -1,6 +1,7 @@
 package org.baiyu.fuckgram;
 
-import android.app.Activity;import android.widget.Toast;
+import android.app.Activity;
+import android.widget.Toast;
 import java.util.ArrayList;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -10,55 +11,56 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class MainHook implements IXposedHookLoadPackage {
-    private final static long DEFAULT_MAX_FILE_SIZE = 1024L * 1024L * 2001L;
-    private final static int downloadChunkSizeBig = 1024 * 1024;
-    private final static int maxDownloadRequests = 8;
-    private final static int maxDownloadRequestsBig = 8;
-    private final static int maxCdnParts = (int) (DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig);
+    private static final long DEFAULT_MAX_FILE_SIZE = 1024L * 1024L * 2001L;
+    private static final int downloadChunkSizeBig = 1024 * 1024;
+    private static final int maxDownloadRequests = 8;
+    private static final int maxDownloadRequestsBig = 8;
+    private static final int maxCdnParts = (int) (DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig);
+
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
         try {
             // message force forward-able
-            XposedBridge.hookAllMethods(
-                    XposedHelpers.findClass(
-                            "org.telegram.messenger.MessagesController", lpparam.classLoader),
+            hookAllMethods(
+                    "org.telegram.messenger.MessagesController",
+                    lpparam.classLoader,
                     "isChatNoForwards",
                     XC_MethodReplacement.returnConstant(false));
             // remove sponsored ads
-            XposedBridge.hookAllMethods(
-                    XposedHelpers.findClass(
-                            "org.telegram.messenger.MessagesController", lpparam.classLoader),
+            hookAllMethods(
+                    "org.telegram.messenger.MessagesController",
+                    lpparam.classLoader,
                     "getSponsoredMessages",
                     XC_MethodReplacement.returnConstant(null));
-            XposedBridge.hookAllMethods(
-                    XposedHelpers.findClass(
-                            "org.telegram.ui.ChatActivity", lpparam.classLoader),
+            hookAllMethods(
+                    "org.telegram.ui.ChatActivity",
+                    lpparam.classLoader,
                     "addSponsoredMessages",
                     XC_MethodReplacement.returnConstant(null));
             // disable reaction list in context menu
-            XposedBridge.hookAllMethods(
-                    XposedHelpers.findClass(
-                            "org.telegram.messenger.MediaDataController", lpparam.classLoader),
+            hookAllMethods(
+                    "org.telegram.messenger.MediaDataController",
+                    lpparam.classLoader,
                     "getEnabledReactionsList",
                     XC_MethodReplacement.returnConstant(new ArrayList<>()));
             // disable double tap quick reaction
-            XposedBridge.hookAllMethods(
-                    XposedHelpers.findClass(
-                            "org.telegram.ui.ChatActivity", lpparam.classLoader),
+            hookAllMethods(
+                    "org.telegram.ui.ChatActivity",
+                    lpparam.classLoader,
                     "selectReaction",
                     new XC_MethodHook() {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                          super.beforeHookedMethod(param);
-                          if (param.args[6] instanceof Boolean && (Boolean) param.args[6]) {
-                            param.setResult(null);
-                          }
+                            super.beforeHookedMethod(param);
+                            if (param.args[6] instanceof Boolean && (Boolean) param.args[6]) {
+                                param.setResult(null);
+                            }
                         }
                     });
             // lock premium feature
-            XposedBridge.hookAllConstructors(
-                    XposedHelpers.findClass(
-                            "org.telegram.messenger.MessagesController", lpparam.classLoader),
+            hookAllConstructors(
+                    "org.telegram.messenger.MessagesController",
+                    lpparam.classLoader,
                     new XC_MethodHook() {
                         @Override
                         protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -67,10 +69,12 @@ public class MainHook implements IXposedHookLoadPackage {
                         }
                     });
             // remove premium emoji set
-            // public EmojiTabsStrip(Context context, Theme.ResourcesProvider resourcesProvider, boolean includeStandard, boolean includeAnimated, int type, Runnable onSettingsOpen)
-            XposedBridge.hookAllConstructors(
-                    XposedHelpers.findClass(
-                            "org.telegram.ui.Components.EmojiTabsStrip", lpparam.classLoader),
+            // public EmojiTabsStrip(Context context, Theme.ResourcesProvider
+            // resourcesProvider, boolean
+            // includeStandard, boolean includeAnimated, int type, Runnable onSettingsOpen)
+            hookAllConstructors(
+                    "org.telegram.ui.Components.EmojiTabsStrip",
+                    lpparam.classLoader,
                     new XC_MethodHook() {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -79,29 +83,60 @@ public class MainHook implements IXposedHookLoadPackage {
                         }
                     });
             // speed up download
-            XposedBridge.hookAllMethods(
-                    XposedHelpers.findClass(
-                            "org.telegram.messenger.FileLoadOperation", lpparam.classLoader),
+            hookAllMethods(
+                    "org.telegram.messenger.FileLoadOperation",
+                    lpparam.classLoader,
                     "updateParams",
                     new XC_MethodHook() {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                             super.beforeHookedMethod(param);
-                            XposedHelpers.setIntField(param.thisObject, "downloadChunkSizeBig", downloadChunkSizeBig);
-                            XposedHelpers.setIntField(param.thisObject, "maxDownloadRequests", maxDownloadRequests);
-                            XposedHelpers.setIntField(param.thisObject, "maxDownloadRequestsBig", maxDownloadRequestsBig);
-                            XposedHelpers.setIntField(param.thisObject, "maxCdnParts", maxCdnParts);
+                            XposedHelpers.setIntField(
+                                    param.thisObject, "downloadChunkSizeBig", downloadChunkSizeBig);
+                            XposedHelpers.setIntField(
+                                    param.thisObject, "maxDownloadRequests", maxDownloadRequests);
+                            XposedHelpers.setIntField(
+                                    param.thisObject, "maxDownloadRequestsBig", maxDownloadRequestsBig);
+                            XposedHelpers.setIntField(
+                                    param.thisObject, "maxCdnParts", maxCdnParts);
                             param.setResult(null);
                         }
                     });
         } catch (Throwable t) {
             XposedBridge.log(t);
-            XposedHelpers.findAndHookMethod(Activity.class, "onResume", new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) {
-                    Toast.makeText((Activity) param.thisObject, "FuckGram: Hook failed, check log for details", Toast.LENGTH_LONG).show();
-                }
-            });
+            XposedHelpers.findAndHookMethod(
+                    Activity.class,
+                    "onResume",
+                    new XC_MethodHook() {
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam param) {
+                            Toast.makeText(
+                                    (Activity) param.thisObject,
+                                    "FuckGram: Hook failed, check log for details",
+                                    Toast.LENGTH_LONG)
+                                    .show();
+                        }
+                    });
+        }
+    }
+
+    private void hookAllMethods(
+            String className, ClassLoader classLoader, String methodName, XC_MethodHook callback) {
+        try {
+            XposedBridge.hookAllMethods(
+                    XposedHelpers.findClass(className, classLoader), methodName, callback);
+        } catch (XposedHelpers.ClassNotFoundError e) {
+            XposedBridge.log("Class not found: " + className);
+        }
+    }
+
+    private void hookAllConstructors(
+            String className, ClassLoader classLoader, XC_MethodHook callback) {
+        try {
+            XposedBridge.hookAllConstructors(
+                    XposedHelpers.findClass(className, classLoader), callback);
+        } catch (XposedHelpers.ClassNotFoundError e) {
+            XposedBridge.log("Class not found: " + className);
         }
     }
 }
