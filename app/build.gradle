@@ -5,14 +5,14 @@ plugins {
 android {
     namespace 'org.baiyu.fuckgram'
     compileSdk 33
+    buildToolsVersion "33.0.1"
 
     defaultConfig {
         applicationId "org.baiyu.fuckgram"
         minSdk 26
         targetSdk 33
-        versionCode 7
-        versionName "2.5"
-
+        versionCode 8
+        versionName "2.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
