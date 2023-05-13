@@ -11,8 +11,8 @@ android {
         applicationId "org.baiyu.fuckgram"
         minSdk 26
         targetSdk 33
-        versionCode 8
-        versionName "2.6"
+        versionCode 10
+        versionName "2.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
