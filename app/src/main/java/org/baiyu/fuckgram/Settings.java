@@ -31,42 +31,35 @@ public class Settings {
         return INSTANCE;
     }
 
-    private boolean getBooleanValue(String prefName, boolean defaultValue) {
-        if (prefs.hasFileChanged()) {
-            prefs.reload();
-        }
-        return prefs.getBoolean(prefName, defaultValue);
-    }
-
     public boolean enableForceForward() {
-        return getBooleanValue(PREF_ENABLE_FORCE_FORWARD, true);
+        return prefs.getBoolean(PREF_ENABLE_FORCE_FORWARD, true);
     }
 
     public boolean enableRemoveSponsoredAds() {
-        return getBooleanValue(PREF_ENABLE_REMOVE_SPONSORED_ADS, true);
+        return prefs.getBoolean(PREF_ENABLE_REMOVE_SPONSORED_ADS, true);
     }
 
     public boolean disableReactionPopup() {
-        return getBooleanValue(PREF_DISABLE_REACTION_POPUP, true);
+        return prefs.getBoolean(PREF_DISABLE_REACTION_POPUP, true);
     }
 
     public boolean disableQuickReaction() {
-        return getBooleanValue(PREF_DISABLE_QUICK_REACTION, true);
+        return prefs.getBoolean(PREF_DISABLE_QUICK_REACTION, true);
     }
 
     public boolean lockPremiumFeatures() {
-        return getBooleanValue(PREF_LOCK_PREMIUM_FEATURES, true);
+        return prefs.getBoolean(PREF_LOCK_PREMIUM_FEATURES, true);
     }
 
     public boolean enableRemoveEmojiSet() {
-        return getBooleanValue(PREF_ENABLE_REMOVE_EMOJI_SET, true);
+        return prefs.getBoolean(PREF_ENABLE_REMOVE_EMOJI_SET, true);
     }
 
     public boolean enableSpeedUpDownload() {
-        return getBooleanValue(PREF_ENABLE_SPEED_UP_DOWNLOAD, true);
+        return prefs.getBoolean(PREF_ENABLE_SPEED_UP_DOWNLOAD, true);
     }
 
     public boolean disableTracking() {
-        return getBooleanValue(PREF_DISABLE_TRACKING, true);
+        return prefs.getBoolean(PREF_DISABLE_TRACKING, true);
     }
 }
