@@ -131,6 +131,8 @@ class MainHook : IXposedHookLoadPackage {
                 XC_MethodReplacement.returnConstant(null)
             )
         }
+
+        // disable swipe
         if (settings.disableChatSwipe()) {
             hookAllMethods(
                 "org.telegram.ui.Cells.DialogCell",
@@ -149,6 +151,12 @@ class MainHook : IXposedHookLoadPackage {
                 lpparam.classLoader,
                 "onSwiped",
                 XC_MethodReplacement.returnConstant(null)
+            )
+            hookAllMethods(
+                "org.telegram.messenger.SharedConfig",
+                lpparam.classLoader,
+                "getChatSwipeAction",
+                XC_MethodReplacement.returnConstant(-1)
             )
         }
     }
