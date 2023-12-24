@@ -1,36 +1,117 @@
-package org.baiyu.fuckgram;
+package org.baiyu.fuckgram
 
-import android.annotation.SuppressLint;
-import android.os.Bundle;
+import android.annotation.SuppressLint
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
+import de.robv.android.xposed.XposedBridge
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceFragmentCompat;
-
-import de.robv.android.xposed.XposedBridge;
-
-public class SettingsActivity extends AppCompatActivity {
-    /** @noinspection deprecation*/
+class SettingsActivity : AppCompatActivity() {
+    /** @noinspection deprecation
+     */
     @SuppressLint("WorldReadableFiles")
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings_layout);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.settings_layout)
         try {
-            getSharedPreferences(BuildConfig.APPLICATION_ID + "_preferences", MODE_WORLD_READABLE);
-        } catch (Exception e) {
-            XposedBridge.log(e);
+            @Suppress("DEPRECATION")
+            getSharedPreferences(BuildConfig.APPLICATION_ID + "_preferences", MODE_WORLD_READABLE)
+        } catch (e: Exception) {
+            XposedBridge.log(e)
         }
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.settings_container, new MySettingsFragment())
-                .commit();
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.settings_container, MySettingsFragment())
+            .commit()
     }
 
-    private static class MySettingsFragment extends PreferenceFragmentCompat {
-        @Override
-        public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
-            setPreferencesFromResource(R.xml.preferences, rootKey);
+    class MySettingsFragment : PreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            preferenceScreen = preferenceManager.createPreferenceScreen(requireContext())
+
+            preferenceScreen.let {
+                it.addPreference(
+                    SwitchPreferenceCompat(requireContext()).apply {
+                        key = Settings.PREF_ENABLE_FORCE_FORWARD
+                        title = getString(R.string.title_enable_force_forward)
+                        setDefaultValue(true)
+                        isIconSpaceReserved = false
+                    }
+                )
+
+                it.addPreference(
+                    SwitchPreferenceCompat(requireContext()).apply {
+                        key = Settings.PREF_ENABLE_REMOVE_SPONSORED_ADS
+                        title = getString(R.string.title_enable_remove_sponsored_ads)
+                        setDefaultValue(true)
+                        isIconSpaceReserved = false
+                    }
+                )
+                it.addPreference(
+                    SwitchPreferenceCompat(requireContext()).apply {
+                        key = Settings.PREF_DISABLE_REACTION_POPUP
+                        title = getString(R.string.title_disable_reaction_popup)
+                        setDefaultValue(true)
+                        isIconSpaceReserved = false
+                    }
+                )
+                it.addPreference(
+                    SwitchPreferenceCompat(requireContext()).apply {
+                        key = Settings.PREF_DISABLE_QUICK_REACTION
+                        title = getString(R.string.title_disable_quick_reaction)
+                        setDefaultValue(true)
+                        isIconSpaceReserved = false
+                    }
+
+                )
+                it.addPreference(
+                    SwitchPreferenceCompat(requireContext()).apply {
+                        key = Settings.PREF_LOCK_PREMIUM_FEATURES
+                        title = getString(R.string.title_lock_premium_features)
+                        setDefaultValue(true)
+                        isIconSpaceReserved = false
+                    }
+                )
+
+                it.addPreference(
+                    SwitchPreferenceCompat(requireContext()).apply {
+                        key = Settings.PREF_ENABLE_REMOVE_EMOJI_SET
+                        title = getString(R.string.title_enable_remove_emoji_set)
+                        setDefaultValue(true)
+                        isIconSpaceReserved = false
+                    }
+                )
+
+                it.addPreference(
+                    SwitchPreferenceCompat(requireContext()).apply {
+                        key = Settings.PREF_ENABLE_SPEED_UP_DOWNLOAD
+                        title = getString(R.string.title_enable_speed_up_download)
+                        setDefaultValue(true)
+                        isIconSpaceReserved = false
+                    }
+                )
+
+                it.addPreference(
+                    SwitchPreferenceCompat(requireContext()).apply {
+                        key = Settings.PREF_DISABLE_TRACKING
+                        title = getString(R.string.title_disable_tracking)
+                        setDefaultValue(true)
+                        isIconSpaceReserved = false
+                    }
+                )
+
+                it.addPreference(
+                    SwitchPreferenceCompat(requireContext()).apply {
+                        key = Settings.PREF_DISABLE_CHAT_SWIPE
+                        title = getString(R.string.title_disable_chat_swipe)
+                        setDefaultValue(true)
+                        isIconSpaceReserved = false
+                    }
+                )
+
+
+            }
         }
     }
 }
