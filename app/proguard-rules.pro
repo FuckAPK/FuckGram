@@ -21,3 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 -keep public class org.baiyu.fuckgram.MainHook
+-dontobfuscate

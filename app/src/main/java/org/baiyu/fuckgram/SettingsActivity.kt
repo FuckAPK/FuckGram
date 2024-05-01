@@ -48,6 +48,7 @@ class SettingsActivity : AppCompatActivity() {
                         isIconSpaceReserved = false
                     }
                 )
+
                 it.addPreference(
                     SwitchPreferenceCompat(requireContext()).apply {
                         key = Settings.PREF_DISABLE_REACTION_POPUP
@@ -56,6 +57,7 @@ class SettingsActivity : AppCompatActivity() {
                         isIconSpaceReserved = false
                     }
                 )
+
                 it.addPreference(
                     SwitchPreferenceCompat(requireContext()).apply {
                         key = Settings.PREF_DISABLE_QUICK_REACTION
@@ -65,6 +67,7 @@ class SettingsActivity : AppCompatActivity() {
                     }
 
                 )
+
                 it.addPreference(
                     SwitchPreferenceCompat(requireContext()).apply {
                         key = Settings.PREF_LOCK_PREMIUM_FEATURES
@@ -109,8 +112,6 @@ class SettingsActivity : AppCompatActivity() {
                         isIconSpaceReserved = false
                     }
                 )
-
-
             }
         }
     }
