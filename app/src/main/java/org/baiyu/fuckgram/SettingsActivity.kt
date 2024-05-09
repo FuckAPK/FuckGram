@@ -112,6 +112,15 @@ class SettingsActivity : AppCompatActivity() {
                         isIconSpaceReserved = false
                     }
                 )
+
+                it.addPreference(
+                    SwitchPreferenceCompat(requireContext()).apply {
+                        key = Settings.PREF_DISABLE_CHANNEL_BOTTOM_BUTTON
+                        title = getString(R.string.title_disable_channel_bottom_button)
+                        setDefaultValue(true)
+                        isIconSpaceReserved = false
+                    }
+                )
             }
         }
     }

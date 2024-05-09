@@ -1,6 +1,7 @@
 package org.baiyu.fuckgram
 
 import android.content.SharedPreferences
+import android.view.View
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
@@ -56,7 +57,6 @@ class MainHook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     @Throws(Throwable::class)
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        super.beforeHookedMethod(param)
                         if (param.args[6] is Boolean && param.args[6] as Boolean) {
                             param.result = null
                         }
@@ -72,7 +72,6 @@ class MainHook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     @Throws(Throwable::class)
                     override fun afterHookedMethod(param: MethodHookParam) {
-                        super.afterHookedMethod(param)
                         XposedHelpers.setBooleanField(param.thisObject, "premiumLocked", true)
                     }
                 })
@@ -89,7 +88,6 @@ class MainHook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     @Throws(Throwable::class)
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        super.beforeHookedMethod(param)
                         param.args[3] = false
                     }
                 })
@@ -104,7 +102,6 @@ class MainHook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     @Throws(Throwable::class)
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        super.beforeHookedMethod(param)
                         XposedHelpers.setIntField(
                             param.thisObject, "downloadChunkSizeBig", downloadChunkSizeBig
                         )
@@ -157,6 +154,61 @@ class MainHook : IXposedHookLoadPackage {
                 lpparam.classLoader,
                 "getChatSwipeAction",
                 XC_MethodReplacement.returnConstant(-1)
+            )
+        }
+
+        // disable channel bottom button
+        if (settings.disableChannelBottomButton()) {
+            hookAllMethods(
+                "org.telegram.ui.ChatActivity",
+                lpparam.classLoader,
+                "updateBottomOverlay",
+//                XC_MethodReplacement.returnConstant(null)
+                object : XC_MethodHook() {
+                    @Throws(Throwable::class)
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val chatActivity = param.thisObject
+                        val bottomOverlayChatText = XposedHelpers.getObjectField(
+                            chatActivity, "bottomOverlayChatText"
+                        ) ?: return
+                        val text = XposedHelpers.getObjectField(
+                            bottomOverlayChatText, "lastText"
+                        ) as CharSequence?
+                        if (text.isNullOrBlank()) {
+                            return
+                        }
+                        val setEnabled by lazy {
+                            XposedHelpers.findMethodExact(
+                                View::class.java, "setEnabled", Boolean::class.java
+                            )
+                        }
+                        val localeController = XposedHelpers.findClass(
+                            "org.telegram.messenger.LocaleController",
+                            lpparam.classLoader
+                        )
+                        val string = XposedHelpers.findClass(
+                            "org.telegram.messenger.R\$string",
+                            lpparam.classLoader
+                        )
+                        val getString: (String, String) -> String? = { key1, key2 ->
+                            XposedHelpers.callStaticMethod(
+                                localeController,
+                                "getString",
+                                key1,
+                                XposedHelpers.getStaticIntField(string, key2)
+                            ) as String?
+                        }
+                        val unMuteStr by lazy {
+                            getString("ChannelUnmute", "ChannelUnmute")
+                        }
+                        val muteStr by lazy {
+                            getString("ChannelMute", "ChannelMute")
+                        }
+                        if (text.toString() == unMuteStr || text.toString() == muteStr) {
+                            setEnabled.invoke(bottomOverlayChatText, false)
+                        }
+                    }
+                }
             )
         }
     }

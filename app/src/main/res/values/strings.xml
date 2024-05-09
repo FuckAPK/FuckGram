@@ -10,4 +10,5 @@
     <string name="title.enable_speed_up_download">Speed up download</string>
     <string name="title.disable_tracking">Disable tracking</string>
     <string name="title_disable_chat_swipe">Disable chat swipe action</string>
+    <string name="title_disable_channel_bottom_button">Disable Channel bottom button</string>
 </resources>

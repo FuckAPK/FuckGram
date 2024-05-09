@@ -40,6 +40,10 @@ class Settings private constructor(private val prefs: SharedPreferences) {
         return prefs.getBoolean(PREF_DISABLE_CHAT_SWIPE, true)
     }
 
+    fun disableChannelBottomButton(): Boolean {
+        return prefs.getBoolean(PREF_DISABLE_CHANNEL_BOTTOM_BUTTON, true)
+    }
+
     companion object {
 
         const val PREF_ENABLE_FORCE_FORWARD = "enable_force_forward"
@@ -51,6 +55,7 @@ class Settings private constructor(private val prefs: SharedPreferences) {
         const val PREF_ENABLE_SPEED_UP_DOWNLOAD = "enable_speed_up_download"
         const val PREF_DISABLE_TRACKING = "disable_tracking"
         const val PREF_DISABLE_CHAT_SWIPE = "disable_chat_swipe"
+        const val PREF_DISABLE_CHANNEL_BOTTOM_BUTTON = "disable_channel_bottom_button"
 
         @Volatile
         private var INSTANCE: Settings? = null
