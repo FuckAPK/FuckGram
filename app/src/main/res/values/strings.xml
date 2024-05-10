@@ -11,4 +11,5 @@
     <string name="title.disable_tracking">Disable tracking</string>
     <string name="title_disable_chat_swipe">Disable chat swipe action</string>
     <string name="title_disable_channel_bottom_button">Disable Channel bottom button</string>
+    <string name="title_prohibit_spoilers">Prohibit spoilers</string>
 </resources>

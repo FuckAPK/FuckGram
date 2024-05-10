@@ -44,6 +44,10 @@ class Settings private constructor(private val prefs: SharedPreferences) {
         return prefs.getBoolean(PREF_DISABLE_CHANNEL_BOTTOM_BUTTON, true)
     }
 
+    fun prohibitSpoilers(): Boolean {
+        return prefs.getBoolean(PREF_PROHIBIT_SPOILERS, true)
+    }
+
     companion object {
 
         const val PREF_ENABLE_FORCE_FORWARD = "enable_force_forward"
@@ -56,6 +60,7 @@ class Settings private constructor(private val prefs: SharedPreferences) {
         const val PREF_DISABLE_TRACKING = "disable_tracking"
         const val PREF_DISABLE_CHAT_SWIPE = "disable_chat_swipe"
         const val PREF_DISABLE_CHANNEL_BOTTOM_BUTTON = "disable_channel_bottom_button"
+        const val PREF_PROHIBIT_SPOILERS = "prohibit_spoilers"
 
         @Volatile
         private var INSTANCE: Settings? = null

@@ -78,9 +78,23 @@ class MainHook : IXposedHookLoadPackage {
         }
 
         // remove premium emoji set
-        // public EmojiTabsStrip(Context context, Theme.ResourcesProvider
-        // resourcesProvider, boolean
-        // includeStandard, boolean includeAnimated, int type, Runnable onSettingsOpen)
+        // public EmojiTabsStrip(
+        //     Context context,
+        //     Theme.ResourcesProvider resourcesProvider,
+        //     boolean includeStandard,
+        //     boolean includeAnimated,
+        //     int type,
+        //     Runnable onSettingsOpen)
+        // or
+        // public EmojiTabsStrip(
+        //     Context context,
+        //     Theme.ResourcesProvider resourcesProvider,
+        //     boolean includeRecent,
+        //     boolean includeStandard,
+        //     boolean includeAnimated,
+        //     int type,
+        //     Runnable onSettingsOpen,
+        //     int accentColor)
         if (settings.enableRemoveEmojiSet()) {
             hookAllConstructors(
                 "org.telegram.ui.Components.EmojiTabsStrip",
@@ -88,7 +102,10 @@ class MainHook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     @Throws(Throwable::class)
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        param.args[3] = false
+                        when (param.args.size) {
+                            6 -> param.args[3] = false
+                            8 -> param.args[4] = false
+                        }
                     }
                 })
         }
@@ -211,17 +228,29 @@ class MainHook : IXposedHookLoadPackage {
                 }
             )
         }
+
+        // prohibit spoilers
+        if (settings.prohibitSpoilers()) {
+            hookAllMethods(
+                "org.telegram.ui.Components.spoilers.SpoilerEffect",
+                lpparam.classLoader,
+                "addSpoilers",
+                XC_MethodReplacement.returnConstant(null)
+            )
+            hookAllMethods(
+                "org.telegram.messenger.MessageObject",
+                lpparam.classLoader,
+                "hasMediaSpoilers",
+                XC_MethodReplacement.returnConstant(false)
+            )
+        }
     }
 
     private fun hookAllMethods(
         className: String, classLoader: ClassLoader, methodName: String, callback: XC_MethodHook
     ) {
-        val clazz = XposedHelpers.findClass(className, classLoader)
-        if (clazz == null) {
-            XposedBridge.log("Class not found: $className")
-            return
-        }
         try {
+            val clazz = XposedHelpers.findClass(className, classLoader)
             XposedBridge.hookAllMethods(clazz, methodName, callback)
         } catch (t: Throwable) {
             XposedBridge.log(t)
@@ -231,12 +260,8 @@ class MainHook : IXposedHookLoadPackage {
     private fun hookAllConstructors(
         className: String, classLoader: ClassLoader, callback: XC_MethodHook
     ) {
-        val clazz = XposedHelpers.findClass(className, classLoader)
-        if (clazz == null) {
-            XposedBridge.log("Class not found: $className")
-            return
-        }
         try {
+            val clazz = XposedHelpers.findClass(className, classLoader)
             XposedBridge.hookAllConstructors(clazz, callback)
         } catch (t: Throwable) {
             XposedBridge.log(t)
