@@ -13,8 +13,8 @@ android {
         applicationId = "org.baiyu.fuckgram"
         minSdk = 26
         targetSdk = 34
-        versionCode = 19
-        versionName = "4.4"
+        versionCode = 20
+        versionName = "4.5"
     }
 
     signingConfigs {

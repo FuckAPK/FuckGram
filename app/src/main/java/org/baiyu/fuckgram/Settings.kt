@@ -49,7 +49,6 @@ class Settings private constructor(private val prefs: SharedPreferences) {
     }
 
     companion object {
-
         const val PREF_ENABLE_FORCE_FORWARD = "enable_force_forward"
         const val PREF_ENABLE_REMOVE_SPONSORED_ADS = "enable_remove_sponsored_ads"
         const val PREF_DISABLE_REACTION_POPUP = "disable_reaction_popup"
@@ -61,6 +60,12 @@ class Settings private constructor(private val prefs: SharedPreferences) {
         const val PREF_DISABLE_CHAT_SWIPE = "disable_chat_swipe"
         const val PREF_DISABLE_CHANNEL_BOTTOM_BUTTON = "disable_channel_bottom_button"
         const val PREF_PROHIBIT_SPOILERS = "prohibit_spoilers"
+
+        private const val DEFAULT_MAX_FILE_SIZE = 1024L * 1024L * 2000L
+        const val DOWNLOAD_CHUNK_SIZE_BIG = 1024 * 1024
+        const val MAX_DOWNLOAD_REQUESTS = 8
+        const val MAX_DOWNLOAD_REQUESTS_BIG = 8
+        const val MAX_CDN_PARTS = (DEFAULT_MAX_FILE_SIZE / DOWNLOAD_CHUNK_SIZE_BIG).toInt()
 
         @Volatile
         private var INSTANCE: Settings? = null

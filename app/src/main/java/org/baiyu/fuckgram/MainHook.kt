@@ -147,16 +147,20 @@ class MainHook : IXposedHookLoadPackage {
                     @Throws(Throwable::class)
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         XposedHelpers.setIntField(
-                            param.thisObject, "downloadChunkSizeBig", downloadChunkSizeBig
+                            param.thisObject,
+                            "downloadChunkSizeBig",
+                            Settings.DOWNLOAD_CHUNK_SIZE_BIG
                         )
                         XposedHelpers.setIntField(
-                            param.thisObject, "maxDownloadRequests", maxDownloadRequests
+                            param.thisObject, "maxDownloadRequests", Settings.MAX_DOWNLOAD_REQUESTS
                         )
                         XposedHelpers.setIntField(
-                            param.thisObject, "maxDownloadRequestsBig", maxDownloadRequestsBig
+                            param.thisObject,
+                            "maxDownloadRequestsBig",
+                            Settings.MAX_DOWNLOAD_REQUESTS_BIG
                         )
                         XposedHelpers.setIntField(
-                            param.thisObject, "maxCdnParts", maxCdnParts
+                            param.thisObject, "maxCdnParts", Settings.MAX_CDN_PARTS
                         )
                         param.result = null
                     }
@@ -272,10 +276,5 @@ class MainHook : IXposedHookLoadPackage {
         private val settings: Settings by lazy {
             Settings.getInstance(prefs)
         }
-        private const val DEFAULT_MAX_FILE_SIZE = 1024L * 1024L * 2001L
-        private const val downloadChunkSizeBig = 1024 * 1024
-        private const val maxDownloadRequests = 8
-        private const val maxDownloadRequestsBig = 8
-        private const val maxCdnParts = (DEFAULT_MAX_FILE_SIZE / downloadChunkSizeBig).toInt()
     }
 }
