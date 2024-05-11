@@ -94,6 +94,16 @@ class MainHook : IXposedHookLoadPackage {
                         XposedHelpers.setBooleanField(param.thisObject, "premiumLocked", true)
                     }
                 })
+            hookAllMethods(
+                "org.telegram.messenger.MessagesController",
+                "applyAppConfig",
+                object : XC_MethodHook() {
+                    @Throws(Throwable::class)
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        XposedHelpers.setBooleanField(param.thisObject, "premiumLocked", true)
+                    }
+                }
+            )
         }
 
         // remove premium emoji set
