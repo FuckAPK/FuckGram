@@ -12,11 +12,35 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 
 class MainHook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
+
+        val hookAllMethods: (String, String, XC_MethodHook) -> Unit =
+            { className, methodName, callback ->
+                try {
+                    XposedHelpers.findClass(className, lpparam.classLoader).let {
+                        XposedBridge.hookAllMethods(it, methodName, callback)
+                    }
+                } catch (t: Throwable) {
+                    XposedBridge.log("Failed to hook $className::$methodName(*)")
+                    XposedBridge.log(t)
+                }
+            }
+
+        val hookAllConstructors: (String, XC_MethodHook) -> Unit =
+            { className, callback ->
+                try {
+                    XposedHelpers.findClass(className, lpparam.classLoader).let {
+                        XposedBridge.hookAllConstructors(it, callback)
+                    }
+                } catch (t: Throwable) {
+                    XposedBridge.log("Failed to hook $className::$className(*)")
+                    XposedBridge.log(t)
+                }
+            }
+
         // message force forward-able
         if (settings.enableForceForward()) {
             hookAllMethods(
                 "org.telegram.messenger.MessagesController",
-                lpparam.classLoader,
                 "isChatNoForwards",
                 XC_MethodReplacement.returnConstant(false)
             )
@@ -26,13 +50,11 @@ class MainHook : IXposedHookLoadPackage {
         if (settings.enableRemoveSponsoredAds()) {
             hookAllMethods(
                 "org.telegram.messenger.MessagesController",
-                lpparam.classLoader,
                 "getSponsoredMessages",
                 XC_MethodReplacement.returnConstant(null)
             )
             hookAllMethods(
                 "org.telegram.ui.ChatActivity",
-                lpparam.classLoader,
                 "addSponsoredMessages",
                 XC_MethodReplacement.returnConstant(null)
             )
@@ -42,7 +64,6 @@ class MainHook : IXposedHookLoadPackage {
         if (settings.disableReactionPopup()) {
             hookAllMethods(
                 "org.telegram.messenger.MediaDataController",
-                lpparam.classLoader,
                 "getEnabledReactionsList",
                 XC_MethodReplacement.returnConstant(ArrayList<Any>())
             )
@@ -52,7 +73,6 @@ class MainHook : IXposedHookLoadPackage {
         if (settings.disableQuickReaction()) {
             hookAllMethods(
                 "org.telegram.ui.ChatActivity",
-                lpparam.classLoader,
                 "selectReaction",
                 object : XC_MethodHook() {
                     @Throws(Throwable::class)
@@ -68,7 +88,6 @@ class MainHook : IXposedHookLoadPackage {
         if (settings.lockPremiumFeatures()) {
             hookAllConstructors(
                 "org.telegram.messenger.MessagesController",
-                lpparam.classLoader,
                 object : XC_MethodHook() {
                     @Throws(Throwable::class)
                     override fun afterHookedMethod(param: MethodHookParam) {
@@ -98,7 +117,6 @@ class MainHook : IXposedHookLoadPackage {
         if (settings.enableRemoveEmojiSet()) {
             hookAllConstructors(
                 "org.telegram.ui.Components.EmojiTabsStrip",
-                lpparam.classLoader,
                 object : XC_MethodHook() {
                     @Throws(Throwable::class)
                     override fun beforeHookedMethod(param: MethodHookParam) {
@@ -114,7 +132,6 @@ class MainHook : IXposedHookLoadPackage {
         if (settings.enableSpeedUpDownload()) {
             hookAllMethods(
                 "org.telegram.messenger.FileLoadOperation",
-                lpparam.classLoader,
                 "updateParams",
                 object : XC_MethodHook() {
                     @Throws(Throwable::class)
@@ -140,7 +157,6 @@ class MainHook : IXposedHookLoadPackage {
         if (settings.disableTracking()) {
             hookAllMethods(
                 "org.telegram.ui.ChatActivity",
-                lpparam.classLoader,
                 "logSponsoredClicked",
                 XC_MethodReplacement.returnConstant(null)
             )
@@ -150,25 +166,21 @@ class MainHook : IXposedHookLoadPackage {
         if (settings.disableChatSwipe()) {
             hookAllMethods(
                 "org.telegram.ui.Cells.DialogCell",
-                lpparam.classLoader,
                 "getTranslationX",
                 XC_MethodReplacement.returnConstant(0f)
             )
             hookAllMethods(
                 "org.telegram.ui.Cells.DialogCell",
-                lpparam.classLoader,
                 "setTranslationX",
                 XC_MethodReplacement.returnConstant(null)
             )
             hookAllMethods(
                 "org.telegram.ui.DialogsActivity.SwipeController",
-                lpparam.classLoader,
                 "onSwiped",
                 XC_MethodReplacement.returnConstant(null)
             )
             hookAllMethods(
                 "org.telegram.messenger.SharedConfig",
-                lpparam.classLoader,
                 "getChatSwipeAction",
                 XC_MethodReplacement.returnConstant(-1)
             )
@@ -178,7 +190,6 @@ class MainHook : IXposedHookLoadPackage {
         if (settings.disableChannelBottomButton()) {
             hookAllMethods(
                 "org.telegram.ui.ChatActivity",
-                lpparam.classLoader,
                 "updateBottomOverlay",
 //                XC_MethodReplacement.returnConstant(null)
                 object : XC_MethodHook() {
@@ -233,38 +244,14 @@ class MainHook : IXposedHookLoadPackage {
         if (settings.prohibitSpoilers()) {
             hookAllMethods(
                 "org.telegram.ui.Components.spoilers.SpoilerEffect",
-                lpparam.classLoader,
                 "addSpoilers",
                 XC_MethodReplacement.returnConstant(null)
             )
             hookAllMethods(
                 "org.telegram.messenger.MessageObject",
-                lpparam.classLoader,
                 "hasMediaSpoilers",
                 XC_MethodReplacement.returnConstant(false)
             )
-        }
-    }
-
-    private fun hookAllMethods(
-        className: String, classLoader: ClassLoader, methodName: String, callback: XC_MethodHook
-    ) {
-        try {
-            val clazz = XposedHelpers.findClass(className, classLoader)
-            XposedBridge.hookAllMethods(clazz, methodName, callback)
-        } catch (t: Throwable) {
-            XposedBridge.log(t)
-        }
-    }
-
-    private fun hookAllConstructors(
-        className: String, classLoader: ClassLoader, callback: XC_MethodHook
-    ) {
-        try {
-            val clazz = XposedHelpers.findClass(className, classLoader)
-            XposedBridge.hookAllConstructors(clazz, callback)
-        } catch (t: Throwable) {
-            XposedBridge.log(t)
         }
     }
 
