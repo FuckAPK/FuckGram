@@ -13,256 +13,271 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 class MainHook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
 
-        val hookAllMethods: (String, String, XC_MethodHook) -> Unit =
-            { className, methodName, callback ->
-                try {
-                    XposedHelpers.findClass(className, lpparam.classLoader).let {
-                        XposedBridge.hookAllMethods(it, methodName, callback)
-                    }
-                } catch (t: Throwable) {
-                    XposedBridge.log("Failed to hook $className::$methodName(*)")
-                    XposedBridge.log(t)
-                }
-            }
-
-        val hookAllConstructors: (String, XC_MethodHook) -> Unit =
-            { className, callback ->
-                try {
-                    XposedHelpers.findClass(className, lpparam.classLoader).let {
-                        XposedBridge.hookAllConstructors(it, callback)
-                    }
-                } catch (t: Throwable) {
-                    XposedBridge.log("Failed to hook $className::$className(*)")
-                    XposedBridge.log(t)
-                }
-            }
-
-        // message force forward-able
-        if (settings.enableForceForward()) {
-            hookAllMethods(
+        val messagesControllerClass by lazy {
+            XposedHelpers.findClass(
                 "org.telegram.messenger.MessagesController",
+                lpparam.classLoader
+            )
+        }
+        val chatActivityClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.ui.ChatActivity",
+                lpparam.classLoader
+            )
+        }
+        val mediaDataControllerClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.messenger.MediaDataController",
+                lpparam.classLoader
+            )
+        }
+        val fileLoadOperationClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.messenger.FileLoadOperation",
+                lpparam.classLoader
+            )
+        }
+        val dialogCellClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.ui.Cells.DialogCell",
+                lpparam.classLoader
+            )
+        }
+        val emojiTabsStripClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.ui.Components.EmojiTabsStrip",
+                lpparam.classLoader
+            )
+        }
+        val sharedConfigClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.messenger.SharedConfig",
+                lpparam.classLoader
+            )
+        }
+        val spoilerEffectClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.ui.Components.spoilers.SpoilerEffect",
+                lpparam.classLoader
+            )
+        }
+        val localeControllerClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.messenger.LocaleController",
+                lpparam.classLoader
+            )
+        }
+        val rStringClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.messenger.R\$string",
+                lpparam.classLoader
+            )
+        }
+        val messageObjectClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.messenger.MessageObject",
+                lpparam.classLoader
+            )
+        }
+        val dialogSwipeControllerClass by lazy {
+            XposedHelpers.findClass(
+                "org.telegram.ui.DialogsActivity\$SwipeController",
+                lpparam.classLoader
+            )
+        }
+
+        fun logHookError(className: String, methodName: String, t: Throwable) {
+            XposedBridge.log("Failed to hook $className::$methodName")
+            XposedBridge.log(t)
+        }
+
+        fun hookMethods(clazz: Class<*>, methodName: String, callback: XC_MethodHook) {
+            try {
+                XposedBridge.hookAllMethods(clazz, methodName, callback)
+            } catch (t: Throwable) {
+                logHookError(clazz.name, methodName, t)
+            }
+        }
+
+        fun hookConstructors(clazz: Class<*>, callback: XC_MethodHook) {
+            try {
+                XposedBridge.hookAllConstructors(clazz, callback)
+            } catch (t: Throwable) {
+                logHookError(clazz.name, "<init>", t)
+            }
+        }
+
+
+        if (settings.enableForceForward()) {
+            hookMethods(
+                messagesControllerClass,
                 "isChatNoForwards",
                 XC_MethodReplacement.returnConstant(false)
             )
         }
 
-        // remove sponsored ads
         if (settings.enableRemoveSponsoredAds()) {
-            hookAllMethods(
-                "org.telegram.messenger.MessagesController",
+            hookMethods(
+                messagesControllerClass,
                 "getSponsoredMessages",
                 XC_MethodReplacement.returnConstant(null)
             )
-            hookAllMethods(
-                "org.telegram.ui.ChatActivity",
+            hookMethods(
+                chatActivityClass,
                 "addSponsoredMessages",
                 XC_MethodReplacement.returnConstant(null)
             )
         }
 
-        // disable reaction list in context menu
         if (settings.disableReactionPopup()) {
-            hookAllMethods(
-                "org.telegram.messenger.MediaDataController",
+            hookMethods(
+                mediaDataControllerClass,
                 "getEnabledReactionsList",
                 XC_MethodReplacement.returnConstant(ArrayList<Any>())
             )
         }
 
-        // disable double tap quick reaction
         if (settings.disableQuickReaction()) {
-            hookAllMethods(
-                "org.telegram.ui.ChatActivity",
-                "selectReaction",
-                object : XC_MethodHook() {
-                    @Throws(Throwable::class)
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        if (param.args[6] is Boolean && param.args[6] as Boolean) {
-                            param.result = null
-                        }
-                    }
-                })
-        }
-
-        // lock premium feature
-        if (settings.lockPremiumFeatures()) {
-            hookAllConstructors(
-                "org.telegram.messenger.MessagesController",
-                object : XC_MethodHook() {
-                    @Throws(Throwable::class)
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        XposedHelpers.setBooleanField(param.thisObject, "premiumLocked", true)
-                    }
-                })
-            hookAllMethods(
-                "org.telegram.messenger.MessagesController",
-                "applyAppConfig",
-                object : XC_MethodHook() {
-                    @Throws(Throwable::class)
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        XposedHelpers.setBooleanField(param.thisObject, "premiumLocked", true)
-                    }
-                }
-            )
-        }
-
-        // remove premium emoji set
-        // public EmojiTabsStrip(
-        //     Context context,
-        //     Theme.ResourcesProvider resourcesProvider,
-        //     boolean includeStandard,
-        //     boolean includeAnimated,
-        //     int type,
-        //     Runnable onSettingsOpen)
-        // or
-        // public EmojiTabsStrip(
-        //     Context context,
-        //     Theme.ResourcesProvider resourcesProvider,
-        //     boolean includeRecent,
-        //     boolean includeStandard,
-        //     boolean includeAnimated,
-        //     int type,
-        //     Runnable onSettingsOpen,
-        //     int accentColor)
-        if (settings.enableRemoveEmojiSet()) {
-            hookAllConstructors(
-                "org.telegram.ui.Components.EmojiTabsStrip",
-                object : XC_MethodHook() {
-                    @Throws(Throwable::class)
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        when (param.args.size) {
-                            6 -> param.args[3] = false
-                            8 -> param.args[4] = false
-                        }
-                    }
-                })
-        }
-
-        // speed up download
-        if (settings.enableSpeedUpDownload()) {
-            hookAllMethods(
-                "org.telegram.messenger.FileLoadOperation",
-                "updateParams",
-                object : XC_MethodHook() {
-                    @Throws(Throwable::class)
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        XposedHelpers.setIntField(
-                            param.thisObject,
-                            "downloadChunkSizeBig",
-                            Settings.DOWNLOAD_CHUNK_SIZE_BIG
-                        )
-                        XposedHelpers.setIntField(
-                            param.thisObject, "maxDownloadRequests", Settings.MAX_DOWNLOAD_REQUESTS
-                        )
-                        XposedHelpers.setIntField(
-                            param.thisObject,
-                            "maxDownloadRequestsBig",
-                            Settings.MAX_DOWNLOAD_REQUESTS_BIG
-                        )
-                        XposedHelpers.setIntField(
-                            param.thisObject, "maxCdnParts", Settings.MAX_CDN_PARTS
-                        )
+            hookMethods(chatActivityClass, "selectReaction", object : XC_MethodHook() {
+                @Throws(Throwable::class)
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    if (param.args[6] is Boolean && param.args[6] as Boolean) {
                         param.result = null
                     }
-                })
+                }
+            })
         }
 
-        // disable tracking
+        if (settings.lockPremiumFeatures()) {
+            hookConstructors(messagesControllerClass, object : XC_MethodHook() {
+                @Throws(Throwable::class)
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    XposedHelpers.setBooleanField(param.thisObject, "premiumLocked", true)
+                }
+            })
+            hookMethods(messagesControllerClass, "applyAppConfig", object : XC_MethodHook() {
+                @Throws(Throwable::class)
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    XposedHelpers.setBooleanField(param.thisObject, "premiumLocked", true)
+                }
+            })
+        }
+
+        if (settings.enableRemoveEmojiSet()) {
+            hookConstructors(emojiTabsStripClass, object : XC_MethodHook() {
+                @Throws(Throwable::class)
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    when (param.args.size) {
+                        6 -> param.args[3] = false
+                        8 -> param.args[4] = false
+                    }
+                }
+            })
+        }
+
+        if (settings.enableSpeedUpDownload()) {
+            hookMethods(fileLoadOperationClass, "updateParams", object : XC_MethodHook() {
+                @Throws(Throwable::class)
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    XposedHelpers.setIntField(
+                        param.thisObject,
+                        "downloadChunkSizeBig",
+                        Settings.DOWNLOAD_CHUNK_SIZE_BIG
+                    )
+                    XposedHelpers.setIntField(
+                        param.thisObject,
+                        "maxDownloadRequests",
+                        Settings.MAX_DOWNLOAD_REQUESTS
+                    )
+                    XposedHelpers.setIntField(
+                        param.thisObject,
+                        "maxDownloadRequestsBig",
+                        Settings.MAX_DOWNLOAD_REQUESTS_BIG
+                    )
+                    XposedHelpers.setIntField(
+                        param.thisObject,
+                        "maxCdnParts",
+                        Settings.MAX_CDN_PARTS
+                    )
+                    param.result = null
+                }
+            })
+        }
+
         if (settings.disableTracking()) {
-            hookAllMethods(
-                "org.telegram.ui.ChatActivity",
+            hookMethods(
+                chatActivityClass,
                 "logSponsoredClicked",
                 XC_MethodReplacement.returnConstant(null)
             )
         }
 
-        // disable swipe
         if (settings.disableChatSwipe()) {
-            hookAllMethods(
-                "org.telegram.ui.Cells.DialogCell",
-                "getTranslationX",
-                XC_MethodReplacement.returnConstant(0f)
-            )
-            hookAllMethods(
-                "org.telegram.ui.Cells.DialogCell",
+            hookMethods(dialogCellClass, "getTranslationX", XC_MethodReplacement.returnConstant(0f))
+            hookMethods(
+                dialogCellClass,
                 "setTranslationX",
                 XC_MethodReplacement.returnConstant(null)
             )
-            hookAllMethods(
-                "org.telegram.ui.DialogsActivity.SwipeController",
+            hookMethods(
+                dialogSwipeControllerClass,
                 "onSwiped",
                 XC_MethodReplacement.returnConstant(null)
             )
-            hookAllMethods(
-                "org.telegram.messenger.SharedConfig",
+            hookMethods(
+                sharedConfigClass,
                 "getChatSwipeAction",
                 XC_MethodReplacement.returnConstant(-1)
             )
         }
 
-        // disable channel bottom button
         if (settings.disableChannelBottomButton()) {
-            hookAllMethods(
-                "org.telegram.ui.ChatActivity",
-                "updateBottomOverlay",
-//                XC_MethodReplacement.returnConstant(null)
-                object : XC_MethodHook() {
-                    @Throws(Throwable::class)
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        val chatActivity = param.thisObject
-                        val bottomOverlayChatText = XposedHelpers.getObjectField(
-                            chatActivity, "bottomOverlayChatText"
-                        ) ?: return
-                        val text = XposedHelpers.getObjectField(
-                            bottomOverlayChatText, "lastText"
-                        ) as CharSequence?
-                        if (text.isNullOrBlank()) {
-                            return
-                        }
-                        val setEnabled by lazy {
-                            XposedHelpers.findMethodExact(
-                                View::class.java, "setEnabled", Boolean::class.java
-                            )
-                        }
-                        val localeController = XposedHelpers.findClass(
-                            "org.telegram.messenger.LocaleController",
-                            lpparam.classLoader
+            hookMethods(chatActivityClass, "updateBottomOverlay", object : XC_MethodHook() {
+                @Throws(Throwable::class)
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val chatActivity = param.thisObject
+                    val bottomOverlayChatText =
+                        XposedHelpers.getObjectField(chatActivity, "bottomOverlayChatText")
+                            ?: return
+                    val text = XposedHelpers.getObjectField(
+                        bottomOverlayChatText,
+                        "lastText"
+                    ) as CharSequence?
+                    if (text.isNullOrBlank()) {
+                        return
+                    }
+                    val setEnabled by lazy {
+                        XposedHelpers.findMethodExact(
+                            View::class.java,
+                            "setEnabled",
+                            Boolean::class.java
                         )
-                        val string = XposedHelpers.findClass(
-                            "org.telegram.messenger.R\$string",
-                            lpparam.classLoader
-                        )
-                        val getString: (String, String) -> String? = { key1, key2 ->
-                            XposedHelpers.callStaticMethod(
-                                localeController,
-                                "getString",
-                                key1,
-                                XposedHelpers.getStaticIntField(string, key2)
-                            ) as String?
-                        }
-                        val unMuteStr by lazy {
-                            getString("ChannelUnmute", "ChannelUnmute")
-                        }
-                        val muteStr by lazy {
-                            getString("ChannelMute", "ChannelMute")
-                        }
-                        if (text.toString() == unMuteStr || text.toString() == muteStr) {
-                            setEnabled.invoke(bottomOverlayChatText, false)
-                        }
+                    }
+                    val getString: (String, String) -> String? = { key1, key2 ->
+                        XposedHelpers.callStaticMethod(
+                            localeControllerClass,
+                            "getString",
+                            key1,
+                            XposedHelpers.getStaticIntField(rStringClass, key2)
+                        ) as String?
+                    }
+                    val unMuteStr by lazy { getString("ChannelUnmute", "ChannelUnmute") }
+                    val muteStr by lazy { getString("ChannelMute", "ChannelMute") }
+                    if (text.toString() == unMuteStr || text.toString() == muteStr) {
+                        setEnabled.invoke(bottomOverlayChatText, false)
                     }
                 }
-            )
+            })
         }
 
-        // prohibit spoilers
         if (settings.prohibitSpoilers()) {
-            hookAllMethods(
-                "org.telegram.ui.Components.spoilers.SpoilerEffect",
+            hookMethods(
+                spoilerEffectClass,
                 "addSpoilers",
                 XC_MethodReplacement.returnConstant(null)
             )
-            hookAllMethods(
-                "org.telegram.messenger.MessageObject",
+            hookMethods(
+                messageObjectClass,
                 "hasMediaSpoilers",
                 XC_MethodReplacement.returnConstant(false)
             )
