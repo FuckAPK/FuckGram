@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">FuckGram</string>
+    <string name="app_desc">Make Telegram Great Again!</string>
+    <string name="title.enable_force_forward">Enable force forward</string>
+    <string name="title.enable_remove_sponsored_ads">Remove sponsored ads</string>
+    <string name="title.disable_reaction_popup">Disable reaction popup</string>
+    <string name="title.disable_quick_reaction">Disable double-tap quick reaction</string>
+    <string name="title.lock_premium_features">Lock premium features</string>
+    <string name="title.enable_remove_emoji_set">Remove emoji set from sticker panel</string>
+    <string name="title.enable_speed_up_download">Speed up download</string>
+    <string name="title.disable_tracking">Disable tracking</string>
+    <string name="title_disable_chat_swipe">Disable chat swipe action</string>
+    <string name="title_disable_channel_bottom_button">Disable Channel bottom button</string>
+    <string name="title_prohibit_spoilers">Prohibit spoilers</string>
+</resources>
