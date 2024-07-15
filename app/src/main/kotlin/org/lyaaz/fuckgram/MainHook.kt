@@ -11,102 +11,8 @@ import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 
 class MainHook : IXposedHookLoadPackage {
-    override fun handleLoadPackage(lpparam: LoadPackageParam) {
-
-        val messagesControllerClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.messenger.MessagesController",
-                lpparam.classLoader
-            )
-        }
-        val chatActivityClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.ui.ChatActivity",
-                lpparam.classLoader
-            )
-        }
-        val mediaDataControllerClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.messenger.MediaDataController",
-                lpparam.classLoader
-            )
-        }
-        val fileLoadOperationClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.messenger.FileLoadOperation",
-                lpparam.classLoader
-            )
-        }
-        val dialogCellClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.ui.Cells.DialogCell",
-                lpparam.classLoader
-            )
-        }
-        val emojiTabsStripClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.ui.Components.EmojiTabsStrip",
-                lpparam.classLoader
-            )
-        }
-        val sharedConfigClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.messenger.SharedConfig",
-                lpparam.classLoader
-            )
-        }
-        val spoilerEffectClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.ui.Components.spoilers.SpoilerEffect",
-                lpparam.classLoader
-            )
-        }
-        val localeControllerClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.messenger.LocaleController",
-                lpparam.classLoader
-            )
-        }
-        val rStringClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.messenger.R\$string",
-                lpparam.classLoader
-            )
-        }
-        val messageObjectClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.messenger.MessageObject",
-                lpparam.classLoader
-            )
-        }
-        val dialogSwipeControllerClass by lazy {
-            XposedHelpers.findClass(
-                "org.telegram.ui.DialogsActivity\$SwipeController",
-                lpparam.classLoader
-            )
-        }
-
-        fun logHookError(className: String, methodName: String, t: Throwable) {
-            XposedBridge.log("Failed to hook $className::$methodName")
-            XposedBridge.log(t)
-        }
-
-        fun hookMethods(clazz: Class<*>, methodName: String, callback: XC_MethodHook) {
-            try {
-                XposedBridge.hookAllMethods(clazz, methodName, callback)
-            } catch (t: Throwable) {
-                logHookError(clazz.name, methodName, t)
-            }
-        }
-
-        fun hookConstructors(clazz: Class<*>, callback: XC_MethodHook) {
-            try {
-                XposedBridge.hookAllConstructors(clazz, callback)
-            } catch (t: Throwable) {
-                logHookError(clazz.name, "<init>", t)
-            }
-        }
-
+    override fun handleLoadPackage(lpparam1: LoadPackageParam) {
+        lpparam = lpparam1
 
         if (settings.enableForceForward()) {
             hookMethods(
@@ -133,7 +39,7 @@ class MainHook : IXposedHookLoadPackage {
             hookMethods(
                 mediaDataControllerClass,
                 "getEnabledReactionsList",
-                XC_MethodReplacement.returnConstant(ArrayList<Any>())
+                XC_MethodReplacement.returnConstant(emptyList<Any>())
             )
         }
 
@@ -242,10 +148,8 @@ class MainHook : IXposedHookLoadPackage {
                     val text = XposedHelpers.getObjectField(
                         bottomOverlayChatText,
                         "lastText"
-                    ) as CharSequence?
-                    if (text.isNullOrBlank()) {
-                        return
-                    }
+                    ) as? CharSequence ?: return
+
                     val setEnabled by lazy {
                         XposedHelpers.findMethodExact(
                             View::class.java,
@@ -259,10 +163,12 @@ class MainHook : IXposedHookLoadPackage {
                             "getString",
                             key1,
                             XposedHelpers.getStaticIntField(rStringClass, key2)
-                        ) as String?
+                        ) as? String
                     }
+
                     val unMuteStr by lazy { getString("ChannelUnmute", "ChannelUnmute") }
                     val muteStr by lazy { getString("ChannelMute", "ChannelMute") }
+
                     if (text.toString() == unMuteStr || text.toString() == muteStr) {
                         setEnabled.invoke(bottomOverlayChatText, false)
                     }
@@ -284,12 +190,48 @@ class MainHook : IXposedHookLoadPackage {
         }
     }
 
-    companion object {
-        private val prefs: SharedPreferences by lazy {
-            XSharedPreferences(BuildConfig.APPLICATION_ID)
+    private fun logHookError(className: String, methodName: String, t: Throwable) {
+        XposedBridge.log("Failed to hook $className::$methodName")
+        XposedBridge.log(t)
+    }
+
+    private fun hookMethods(clazz: Class<*>, methodName: String, callback: XC_MethodHook) {
+        try {
+            XposedBridge.hookAllMethods(clazz, methodName, callback)
+        } catch (t: Throwable) {
+            logHookError(clazz.name, methodName, t)
         }
-        private val settings: Settings by lazy {
-            Settings.getInstance(prefs)
+    }
+
+    private fun hookConstructors(clazz: Class<*>, callback: XC_MethodHook) {
+        try {
+            XposedBridge.hookAllConstructors(clazz, callback)
+        } catch (t: Throwable) {
+            logHookError(clazz.name, "<init>", t)
         }
+    }
+
+    private companion object {
+        lateinit var lpparam: LoadPackageParam
+
+        val prefs: SharedPreferences by lazy { XSharedPreferences(BuildConfig.APPLICATION_ID) }
+        val settings: Settings by lazy { Settings.getInstance(prefs) }
+
+        fun getClass(className: String): Class<*> {
+            return XposedHelpers.findClass(className, lpparam.classLoader)
+        }
+
+        val messagesControllerClass: Class<*> by lazy { getClass("org.telegram.messenger.MessagesController") }
+        val chatActivityClass: Class<*> by lazy { getClass("org.telegram.ui.ChatActivity") }
+        val mediaDataControllerClass: Class<*> by lazy { getClass("org.telegram.messenger.MediaDataController") }
+        val fileLoadOperationClass: Class<*> by lazy { getClass("org.telegram.messenger.FileLoadOperation") }
+        val dialogCellClass: Class<*> by lazy { getClass("org.telegram.ui.Cells.DialogCell") }
+        val emojiTabsStripClass: Class<*> by lazy { getClass("org.telegram.ui.Components.EmojiTabsStrip") }
+        val sharedConfigClass: Class<*> by lazy { getClass("org.telegram.messenger.SharedConfig") }
+        val spoilerEffectClass: Class<*> by lazy { getClass("org.telegram.ui.Components.spoilers.SpoilerEffect") }
+        val localeControllerClass: Class<*> by lazy { getClass("org.telegram.messenger.LocaleController") }
+        val rStringClass: Class<*> by lazy { getClass("org.telegram.messenger.R\$string") }
+        val messageObjectClass: Class<*> by lazy { getClass("org.telegram.messenger.MessageObject") }
+        val dialogSwipeControllerClass: Class<*> by lazy { getClass("org.telegram.ui.DialogsActivity\$SwipeController") }
     }
 }
