@@ -3,6 +3,7 @@ package org.lyaaz.fuckgram
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.EditTextPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import de.robv.android.xposed.XposedBridge
@@ -45,58 +46,72 @@ class SettingsActivity : AppCompatActivity() {
             addSwitchPreference(
                 Settings.PREF_ENABLE_FORCE_FORWARD,
                 R.string.title_enable_force_forward,
-                true
+                Settings.DEFAULT_ENABLE_FORCE_FORWARD
             )
             addSwitchPreference(
                 Settings.PREF_ENABLE_REMOVE_SPONSORED_ADS,
                 R.string.title_enable_remove_sponsored_ads,
-                true
+                Settings.DEFAULT_ENABLE_REMOVE_SPONSORED_ADS
             )
             addSwitchPreference(
                 Settings.PREF_DISABLE_REACTION_POPUP,
                 R.string.title_disable_reaction_popup,
-                true
+                Settings.DEFAULT_DISABLE_REACTION_POPUP
             )
             addSwitchPreference(
                 Settings.PREF_DISABLE_QUICK_REACTION,
                 R.string.title_disable_quick_reaction,
-                true
+                Settings.DEFAULT_DISABLE_QUICK_REACTION
             )
             addSwitchPreference(
                 Settings.PREF_LOCK_PREMIUM_FEATURES,
                 R.string.title_lock_premium_features,
-                true
+                Settings.DEFAULT_LOCK_PREMIUM_FEATURES
             )
             addSwitchPreference(
                 Settings.PREF_ENABLE_REMOVE_EMOJI_SET,
                 R.string.title_enable_remove_emoji_set,
-                true
+                Settings.DEFAULT_ENABLE_REMOVE_EMOJI_SET
             )
             addSwitchPreference(
                 Settings.PREF_ENABLE_SPEED_UP_DOWNLOAD,
                 R.string.title_enable_speed_up_download,
-                true
+                Settings.DEFAULT_ENABLE_SPEED_UP_DOWNLOAD
             )
             addSwitchPreference(
                 Settings.PREF_DISABLE_TRACKING,
                 R.string.title_disable_tracking,
-                true
+                Settings.DEFAULT_DISABLE_TRACKING
             )
             addSwitchPreference(
                 Settings.PREF_DISABLE_CHAT_SWIPE,
                 R.string.title_disable_chat_swipe,
-                true
+                Settings.DEFAULT_DISABLE_CHAT_SWIPE
             )
             addSwitchPreference(
                 Settings.PREF_DISABLE_CHANNEL_BOTTOM_BUTTON,
                 R.string.title_disable_channel_bottom_button,
-                true
+                Settings.DEFAULT_DISABLE_CHANNEL_BOTTOM_BUTTON
             )
             addSwitchPreference(
                 Settings.PREF_PROHIBIT_SPOILERS,
                 R.string.title_prohibit_spoilers,
-                true
+                Settings.DEFAULT_PROHIBIT_SPOILERS
             )
+            addSwitchPreference(
+                Settings.PREF_ENABLE_MESSAGE_FILTER,
+                R.string.title_enable_message_filter,
+                Settings.DEFAULT_ENABLE_MESSAGE_FILTER
+            )
+            EditTextPreference(requireContext()).apply {
+                this.key = Settings.PREF_MESSAGE_FILTER_PATTERN
+                this.title = getString(R.string.title_message_filter_pattern)
+                this.isIconSpaceReserved = false
+                this.setDefaultValue(Settings.DEFAULT_MESSAGE_FILTER_PATTERN)
+                this.setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance())
+            }.let {
+                preferenceScreen.addPreference(it)
+            }
         }
     }
 }

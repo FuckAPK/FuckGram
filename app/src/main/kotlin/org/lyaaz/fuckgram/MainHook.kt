@@ -188,6 +188,54 @@ class MainHook : IXposedHookLoadPackage {
                 XC_MethodReplacement.returnConstant(false)
             )
         }
+
+        if (settings.enableMessageFilter() && settings.messageFilterPattern().isNotEmpty()) {
+            val blacklistPattern by lazy {
+                settings.messageFilterPattern().toRegex(RegexOption.IGNORE_CASE)
+            }
+            XposedBridge.hookMethod(
+                java.util.ArrayList::class.java.getDeclaredMethod(
+                    "add",
+                    Object::class.java
+                ), object : XC_MethodHook() {
+                    @Throws(Throwable::class)
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val arg = param.args[0] ?: return
+                        if (arg.javaClass.name == messageObjectClass.name) {
+                            val text by lazy {
+                                XposedHelpers.getObjectField(
+                                    arg, "messageText"
+                                ) as CharSequence?
+                            }
+                            val caption by lazy {
+                                XposedHelpers.getObjectField(
+                                    arg, "caption"
+                                ) as CharSequence?
+                            }
+                            val layoutCreated by lazy {
+                                XposedHelpers.getBooleanField(
+                                    arg, "layoutCreated"
+                                )
+                            }
+                            // avoid block pinned message
+                            if (!layoutCreated) return
+                            text?.let {
+                                if (blacklistPattern.containsMatchIn(it)) {
+                                    param.result = false
+                                    return
+                                }
+                            }
+                            caption?.let {
+                                if (blacklistPattern.containsMatchIn(it)) {
+                                    param.result = false
+                                    return
+                                }
+                            }
+                        }
+                    }
+                }
+            )
+        }
     }
 
     private fun logHookError(className: String, methodName: String, t: Throwable) {

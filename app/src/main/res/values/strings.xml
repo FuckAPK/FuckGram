@@ -12,4 +12,6 @@
     <string name="title_disable_chat_swipe">Disable chat swipe action</string>
     <string name="title_disable_channel_bottom_button">Disable Channel bottom button</string>
     <string name="title_prohibit_spoilers">Prohibit spoilers</string>
+    <string name="title_enable_message_filter">Enable message filter</string>
+    <string name="title_message_filter_pattern">Message filter pattern</string>
 </resources>
