@@ -1,8 +1,19 @@
+import java.io.ByteArrayOutputStream
 import java.util.Properties
 
 plugins {
     id("com.android.application")
     id("kotlin-android")
+}
+
+fun String.execute(currentWorkingDir: File = file("./")): String {
+    val byteOut = ByteArrayOutputStream()
+    project.exec {
+        workingDir = currentWorkingDir
+        commandLine = split("\\s".toRegex())
+        standardOutput = byteOut
+    }
+    return byteOut.toString().trim()
 }
 
 android {
@@ -13,8 +24,8 @@ android {
         applicationId = "org.lyaaz.fuckgram"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.2"
+        versionCode = "git rev-list HEAD --count".execute().toInt()
+        versionName = "git describe --tag".execute()
     }
 
     signingConfigs {
