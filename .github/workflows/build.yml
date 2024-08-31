@@ -10,12 +10,7 @@ on:
 
 jobs:
   build:
-    uses: lyaaz/workflows/.github/workflows/build.yml@main
+    uses: FuckAPK/workflows/.github/workflows/build.yml@main
     permissions:
       contents: write
-    secrets:
-      KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-
+    secrets: inherit
