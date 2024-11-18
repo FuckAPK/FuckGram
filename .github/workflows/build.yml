@@ -1,4 +1,4 @@
-name: Build and Release on Tag
+name: Build
 
 on:
   push:
@@ -6,6 +6,11 @@ on:
       - main
     tags:
       - '*'
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
   workflow_dispatch:
 
 jobs:
