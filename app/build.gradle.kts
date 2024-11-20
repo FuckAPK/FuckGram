@@ -23,7 +23,7 @@ android {
     defaultConfig {
         applicationId = "org.lyaaz.fuckgram"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = "git rev-list HEAD --count".execute().toInt()
         versionName = "git describe --tag".execute()
     }
