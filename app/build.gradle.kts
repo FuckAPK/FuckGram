@@ -25,7 +25,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = "git rev-list HEAD --count".execute().toInt()
-        versionName = "git describe --tag".execute()
+        versionName = "git describe --tag --always".execute().removePrefix("v")
     }
 
     signingConfigs {
