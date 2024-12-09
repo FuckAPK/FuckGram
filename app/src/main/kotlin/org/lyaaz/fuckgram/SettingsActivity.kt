@@ -94,6 +94,11 @@ class SettingsActivity : AppCompatActivity() {
                 Settings.DEFAULT_DISABLE_CHANNEL_BOTTOM_BUTTON
             )
             addSwitchPreference(
+                Settings.PREF_DISABLE_STORIES,
+                R.string.title_disable_stories,
+                Settings.DEFAULT_DISABLE_STORIES
+            )
+            addSwitchPreference(
                 Settings.PREF_PROHIBIT_SPOILERS,
                 R.string.title_prohibit_spoilers,
                 Settings.DEFAULT_PROHIBIT_SPOILERS

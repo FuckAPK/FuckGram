@@ -50,6 +50,13 @@ class Settings private constructor(private val prefs: SharedPreferences) {
         )
     }
 
+    fun disableStories(): Boolean {
+        return prefs.getBoolean(
+            PREF_DISABLE_STORIES,
+            DEFAULT_DISABLE_STORIES
+        )
+    }
+
     fun prohibitSpoilers(): Boolean {
         return prefs.getBoolean(PREF_PROHIBIT_SPOILERS, DEFAULT_PROHIBIT_SPOILERS)
     }
@@ -73,6 +80,7 @@ class Settings private constructor(private val prefs: SharedPreferences) {
         const val PREF_DISABLE_TRACKING = "disable_tracking"
         const val PREF_DISABLE_CHAT_SWIPE = "disable_chat_swipe"
         const val PREF_DISABLE_CHANNEL_BOTTOM_BUTTON = "disable_channel_bottom_button"
+        const val PREF_DISABLE_STORIES = "disable_stories"
         const val PREF_PROHIBIT_SPOILERS = "prohibit_spoilers"
         const val PREF_ENABLE_MESSAGE_FILTER = "enable_message_filter"
         const val PREF_MESSAGE_FILTER_PATTERN = "message_filter_pattern"
@@ -87,6 +95,7 @@ class Settings private constructor(private val prefs: SharedPreferences) {
         const val DEFAULT_DISABLE_TRACKING = true
         const val DEFAULT_DISABLE_CHAT_SWIPE = true
         const val DEFAULT_DISABLE_CHANNEL_BOTTOM_BUTTON = true
+        const val DEFAULT_DISABLE_STORIES = true
         const val DEFAULT_PROHIBIT_SPOILERS = true
         const val DEFAULT_ENABLE_MESSAGE_FILTER = false
         const val DEFAULT_MESSAGE_FILTER_PATTERN = "车队|互推|飞机杯|优惠|机场|推广"

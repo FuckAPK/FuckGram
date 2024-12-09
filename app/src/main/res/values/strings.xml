@@ -14,4 +14,5 @@
     <string name="title_prohibit_spoilers">Prohibit spoilers</string>
     <string name="title_enable_message_filter">Enable message filter</string>
     <string name="title_message_filter_pattern">Message filter pattern</string>
+    <string name="title_disable_stories">Disable stories</string>
 </resources>

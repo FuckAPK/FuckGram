@@ -21,4 +21,5 @@
 #-renamesourcefileattribute SourceFile
 
 -keep public class org.lyaaz.fuckgram.MainHook
+-keep public class org.lyaaz.fuckgram.features.*
 -dontobfuscate
