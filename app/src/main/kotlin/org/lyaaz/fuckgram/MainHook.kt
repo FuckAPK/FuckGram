@@ -6,7 +6,7 @@ import org.lyaaz.fuckgram.features.*
 
 class MainHook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
-        HookMoule.lpparam = lpparam
+        HookModule.lpparam = lpparam
         modules
             .filter { it.enabled() }
             .forEach {
@@ -15,7 +15,7 @@ class MainHook : IXposedHookLoadPackage {
     }
 
     companion object {
-        private val modules = listOf<HookMoule>(
+        private val modules = listOf<HookModule>(
             ChannelBottomButtonHook,
             ChatSwipeHook,
             ForceForwardHook,

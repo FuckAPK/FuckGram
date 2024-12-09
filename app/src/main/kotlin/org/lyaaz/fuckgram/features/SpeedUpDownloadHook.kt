@@ -4,13 +4,13 @@ import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodHook.MethodHookParam
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
-import org.lyaaz.fuckgram.HookMoule
-import org.lyaaz.fuckgram.HookMoule.Companion.fileLoadOperationClass
-import org.lyaaz.fuckgram.HookMoule.Companion.settings
+import org.lyaaz.fuckgram.HookModule
+import org.lyaaz.fuckgram.HookModule.Companion.fileLoadOperationClass
+import org.lyaaz.fuckgram.HookModule.Companion.settings
 import org.lyaaz.fuckgram.HookUtils.hookMethods
 import org.lyaaz.fuckgram.Settings
 
-object SpeedUpDownloadHook : HookMoule {
+object SpeedUpDownloadHook : HookModule {
     override fun enabled(): Boolean {
         return settings.enableSpeedUpDownload()
     }

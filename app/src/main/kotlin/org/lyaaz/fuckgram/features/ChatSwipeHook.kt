@@ -2,14 +2,14 @@ package org.lyaaz.fuckgram.features
 
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.callbacks.XC_LoadPackage
-import org.lyaaz.fuckgram.HookMoule
-import org.lyaaz.fuckgram.HookMoule.Companion.dialogCellClass
-import org.lyaaz.fuckgram.HookMoule.Companion.dialogSwipeControllerClass
-import org.lyaaz.fuckgram.HookMoule.Companion.settings
-import org.lyaaz.fuckgram.HookMoule.Companion.sharedConfigClass
+import org.lyaaz.fuckgram.HookModule
+import org.lyaaz.fuckgram.HookModule.Companion.dialogCellClass
+import org.lyaaz.fuckgram.HookModule.Companion.dialogSwipeControllerClass
+import org.lyaaz.fuckgram.HookModule.Companion.settings
+import org.lyaaz.fuckgram.HookModule.Companion.sharedConfigClass
 import org.lyaaz.fuckgram.HookUtils.hookMethods
 
-object ChatSwipeHook : HookMoule {
+object ChatSwipeHook : HookModule {
 
     override fun enabled(): Boolean {
         return settings.disableChatSwipe()

@@ -5,12 +5,12 @@ import de.robv.android.xposed.XC_MethodHook.MethodHookParam
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
-import org.lyaaz.fuckgram.HookMoule
-import org.lyaaz.fuckgram.HookMoule.Companion.messageObjectClass
-import org.lyaaz.fuckgram.HookMoule.Companion.settings
+import org.lyaaz.fuckgram.HookModule
+import org.lyaaz.fuckgram.HookModule.Companion.messageObjectClass
+import org.lyaaz.fuckgram.HookModule.Companion.settings
 import org.lyaaz.fuckgram.HookUtils.logHookError
 
-object MessageFilterHook : HookMoule {
+object MessageFilterHook : HookModule {
 
     override fun enabled(): Boolean {
         return settings.enableMessageFilter()

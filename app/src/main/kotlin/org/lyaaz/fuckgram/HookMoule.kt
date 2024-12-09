@@ -5,7 +5,7 @@ import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 
-interface HookMoule {
+interface HookModule {
     fun hook(lpparam: LoadPackageParam): Boolean
     fun enabled(): Boolean
 

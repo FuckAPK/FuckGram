@@ -3,12 +3,12 @@ package org.lyaaz.fuckgram.features
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodHook.MethodHookParam
 import de.robv.android.xposed.callbacks.XC_LoadPackage
-import org.lyaaz.fuckgram.HookMoule
-import org.lyaaz.fuckgram.HookMoule.Companion.emojiTabsStripClass
-import org.lyaaz.fuckgram.HookMoule.Companion.settings
+import org.lyaaz.fuckgram.HookModule
+import org.lyaaz.fuckgram.HookModule.Companion.emojiTabsStripClass
+import org.lyaaz.fuckgram.HookModule.Companion.settings
 import org.lyaaz.fuckgram.HookUtils.hookConstructors
 
-object RemoveEmojiSetHook : HookMoule {
+object RemoveEmojiSetHook : HookModule {
     override fun enabled(): Boolean {
         return settings.enableRemoveEmojiSet()
     }
