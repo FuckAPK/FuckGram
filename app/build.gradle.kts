@@ -70,7 +70,7 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
 
     // compose
-    val composeBom = platform("androidx.compose:compose-bom:2025.03.01")
+    val composeBom = platform("androidx.compose:compose-bom:2025.04.00")
     implementation(composeBom)
 
     implementation("androidx.compose.material3:material3")
