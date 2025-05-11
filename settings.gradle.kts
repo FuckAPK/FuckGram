@@ -19,3 +19,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Fuck Gram"
 include(":app")
+include(":ui")

@@ -5,28 +5,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.StringRes
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
-import org.lyaaz.fuckgram.ui.AppTheme as Theme
+import org.lyaaz.ui.SwitchPreferenceItem
+import org.lyaaz.ui.TextFieldPreference
+import org.lyaaz.ui.theme.AppTheme as Theme
 
 class SettingsActivity : ComponentActivity() {
 
@@ -305,103 +294,5 @@ fun SettingsScreen() {
                 )
             )
         }
-    }
-}
-
-@Composable
-fun SwitchPreferenceItem(
-    @StringRes title: Int,
-    @StringRes summary: Int? = null,
-    checked: Boolean,
-    enabled: Boolean = true,
-    onCheckedChange: (Boolean) -> Unit,
-    noSwitch: Boolean = false
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
-            .padding(vertical = 8.dp, horizontal = 16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(id = title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(if (enabled) 1.0f else 0.6f)
-                )
-                if (summary != null) {
-                    Text(
-                        text = stringResource(id = summary),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(if (enabled) 1.0f else 0.6f)
-                    )
-                }
-            }
-            if (!noSwitch) {
-                Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
-            }
-        }
-    }
-}
-
-@Composable
-fun TextFieldPreference(
-    @StringRes title: Int,
-    @StringRes summary: Int? = null,
-    @StringRes unit: Int? = null,
-    enabled: Boolean = true,
-    value: String,
-    onValueChange: (String) -> Unit,
-    keyboardType: KeyboardType = KeyboardType.Text,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp)
-    ) {
-        Text(
-            text = stringResource(id = title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(if (enabled) 1.0f else 0.6f)
-        )
-        if (summary != null) {
-            Text(
-                text = stringResource(id = summary),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(if (enabled) 0.6f else 0.4f)
-            )
-        }
-        val focusManager = LocalFocusManager.current
-        OutlinedTextField(
-            enabled = enabled,
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = false,
-            maxLines = 3,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = keyboardType,
-                imeAction = ImeAction.Done
-            ),
-            suffix = unit?.let {
-                @Composable {
-                    Text(
-                        text = stringResource(id = it),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary.copy(if (enabled) 1.0f else 0.6f)
-                    )
-                }
-            },
-            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            textStyle = MaterialTheme.typography.bodyMedium
-        )
     }
 }
